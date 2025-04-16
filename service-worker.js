@@ -1,43 +1,51 @@
-// Service Worker (Vereinfachtes Caching)
-const CACHE_NAME = 'mk-elo-cache-v2'; // Cache-Version erhöhen bei Änderungen!
-// Nur essenzielle lokale Dateien cachen
+// Service Worker (Verbessertes Caching & Logging)
+const CACHE_NAME = 'mk-elo-cache-v3'; // Cache-Version erhöht!
+// Nur essenzielle lokale Dateien cachen, mit './' präzisiert
 const urlsToCache = [
-  './', // Alias für index.html im selben Verzeichnis
-  'index.html',
-  'manifest.json',
-  'icons/icon-192x192.png', // Beispiel-Icon Pfade
-  'icons/icon-512x512.png'
+  './', // Wichtig für den Startpunkt
+  './index.html',
+  './manifest.json',
+  './icons/icon-192x192.png',
+  './icons/icon-512x512.png'
+  // Externe URLs (CDNs) werden bewusst NICHT gecached, um Komplexität zu vermeiden
 ];
 
 // Installieren: Cache öffnen und Dateien hinzufügen
 self.addEventListener('install', event => {
-  console.log('[SW] Installiere v2...');
+  console.log(`[SW ${CACHE_NAME}] Installiere...`);
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[SW] Cache geöffnet, füge Kern-Assets hinzu:', urlsToCache);
-        return cache.addAll(urlsToCache); // Fügt alle lokalen Dateien hinzu
+        console.log(`[SW ${CACHE_NAME}] Cache geöffnet, füge Kern-Assets hinzu:`, urlsToCache);
+        // Wichtig: addAll schlägt fehl, wenn auch nur eine URL nicht erreichbar ist!
+        return cache.addAll(urlsToCache);
       })
-      .then(() => self.skipWaiting()) // Aktiviere neuen SW sofort
-      .catch(err => console.error('[SW] Caching fehlgeschlagen während Installation:', err))
+      .then(() => {
+          console.log(`[SW ${CACHE_NAME}] Alle Assets erfolgreich gecached.`);
+          return self.skipWaiting(); // Aktiviere neuen SW sofort
+      })
+      .catch(err => console.error(`[SW ${CACHE_NAME}] Caching fehlgeschlagen während Installation:`, err))
   );
 });
 
 // Aktivieren: Alte Caches löschen
 self.addEventListener('activate', event => {
-  console.log('[SW] Aktiviere v2...');
+  console.log(`[SW ${CACHE_NAME}] Aktiviere...`);
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log('[SW] Lösche alten Cache:', cacheName);
+            console.log(`[SW ${CACHE_NAME}] Lösche alten Cache:`, cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => self.clients.claim()) // Übernehme Kontrolle sofort
+    }).then(() => {
+        console.log(`[SW ${CACHE_NAME}] Clients übernommen.`);
+        return self.clients.claim(); // Übernehme Kontrolle sofort
+    })
   );
 });
 
@@ -48,9 +56,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Nur Anfragen für Ressourcen im selben Ursprung (keine CDNs etc.) abfangen
+  // Nur Anfragen für Ressourcen im selben Ursprung behandeln
   if (!event.request.url.startsWith(self.location.origin)) {
-      // console.log('[SW] Ignoriere externe Anfrage:', event.request.url);
+      // console.log(`[SW ${CACHE_NAME}] Ignoriere externe Anfrage:`, event.request.url);
       return;
   }
 
@@ -60,20 +68,19 @@ self.addEventListener('fetch', event => {
       .then(cachedResponse => {
         // Gebe gecachte Antwort zurück, falls vorhanden
         if (cachedResponse) {
-          // console.log('[SW] Bediene aus Cache:', event.request.url);
+          // console.log(`[SW ${CACHE_NAME}] Bediene aus Cache:`, event.request.url);
           return cachedResponse;
         }
 
-        // Ansonsten: Vom Netzwerk fetchen
-        // console.log('[SW] Fetche vom Netzwerk:', event.request.url);
+        // Ansonsten: Vom Netzwerk fetchen (für lokale Dateien, die nicht im Cache sind?)
+        // console.log(`[SW ${CACHE_NAME}] Nicht im Cache, fetche vom Netzwerk:`, event.request.url);
         return fetch(event.request).then(networkResponse => {
-            // WICHTIG: Hier NICHT dynamisch cachen, um Fehler zu vermeiden.
-            // Nur die bei 'install' definierten URLs sind im Cache.
+            // Hier nicht mehr dynamisch cachen, um es einfach zu halten.
             return networkResponse;
         }).catch(error => {
-            console.error('[SW] Netzwerk-Fetch fehlgeschlagen:', error);
-            // Optional: Fallback auf eine Offline-Seite/Ressource
-            // return caches.match('/offline.html');
+            console.error(`[SW ${CACHE_NAME}] Netzwerk-Fetch fehlgeschlagen für ${event.request.url}:`, error);
+            // Hier könnte man eine Offline-Fallback-Seite anzeigen
+            // throw error; // Fehler weitergeben, damit Browser Standardfehler zeigt
         });
       })
   );
