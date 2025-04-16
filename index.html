@@ -150,33 +150,3 @@
 
 </body>
 </html>
-```
-
-**2. Aktualisierter Inhalt für `manifest.json`**
-(Stellt sicher, dass Icon-Pfade relativ sind)
-
-
-```json
-{
-  "name": "MK Elo Rechner",
-  "short_name": "MK Elo",
-  "description": "Ein einfacher Elo-Rechner für Mario Kart.",
-  "start_url": ".", /* Startet im aktuellen Verzeichnis */
-  "display": "standalone", /* Wichtig für App-Feeling */
-  "background_color": "#f0f9ff", /* Helles Blau als Beispiel */
-  "theme_color": "#0ea5e9", /* Tailwind sky-500 als Beispiel */
-  "icons": [
-    {
-      "src": "icons/icon-192x192.png", /* Relativer Pfad */
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512x512.png", /* Relativer Pfad */
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
-}
