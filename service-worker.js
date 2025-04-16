@@ -1,65 +1,38 @@
-// Service Worker für einfaches Caching (Offline-Fähigkeit)
-
-const CACHE_NAME = 'mk-elo-cache-v1';
-// Wichtige Dateien, die immer gecached werden sollen
+// Service Worker (Vereinfachtes Caching)
+const CACHE_NAME = 'mk-elo-cache-v2'; // Cache-Version erhöhen bei Änderungen!
+// Nur essenzielle lokale Dateien cachen
 const urlsToCache = [
-  '/', // Die Startseite (index.html)
-  '/index.html',
-  '/manifest.json',
-  // Optional: CDN-Skripte cachen (kann Bandbreite sparen, aber Vorsicht bei Updates)
-  'https://unpkg.com/react@18/umd/react.production.min.js',
-  'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-  'https://cdn.tailwindcss.com'
-  // Füge hier Pfade zu deinen Icons hinzu, wenn du sie gecached haben willst
-  // z.B. '/icons/icon-192x192.png', '/icons/icon-512x512.png'
+  './', // Alias für index.html im selben Verzeichnis
+  'index.html',
+  'manifest.json',
+  'icons/icon-192x192.png', // Beispiel-Icon Pfade
+  'icons/icon-512x512.png'
 ];
 
-// Installation: Cache öffnen und Dateien hinzufügen
+// Installieren: Cache öffnen und Dateien hinzufügen
 self.addEventListener('install', event => {
-  console.log('[Service Worker] Installiere...');
+  console.log('[SW] Installiere v2...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[Service Worker] Cache geöffnet, füge Kern-Assets hinzu:', urlsToCache);
-        // Wichtig: fetch für CDN-Ressourcen braucht ggf. spezielle Behandlung
-        // Hier ein einfacher Ansatz, der bei CORS-Problemen fehlschlagen kann
-        const cachePromises = urlsToCache.map(urlToCache => {
-            // Erstelle einen Request ohne CORS-Einschränkungen für externe Ressourcen
-            const request = new Request(urlToCache, { mode: 'no-cors' });
-            return fetch(request).then(response => {
-                if (!response.ok && response.status !== 0) { // Status 0 bei opaque responses
-                    console.warn(`[Service Worker] Konnte ${urlToCache} nicht fetchen, Status: ${response.status}`);
-                    // Nicht cachen, wenn Fehler
-                    return Promise.resolve(); // Fortfahren ohne Fehler
-                }
-                // Nur cachen, wenn erfolgreich gefetched
-                 console.log(`[Service Worker] Cache ${urlToCache}`);
-                return cache.put(urlToCache, response);
-            }).catch(err => {
-                 console.warn(`[Service Worker] Fetch-Fehler für ${urlToCache}: ${err}`);
-                 // Fortfahren ohne Fehler
-                 return Promise.resolve();
-            });
-        });
-         // Füge lokale Ressourcen hinzu (ohne no-cors)
-         cachePromises.push(cache.addAll(['/', '/index.html', '/manifest.json']));
-
-        return Promise.all(cachePromises);
+        console.log('[SW] Cache geöffnet, füge Kern-Assets hinzu:', urlsToCache);
+        return cache.addAll(urlsToCache); // Fügt alle lokalen Dateien hinzu
       })
       .then(() => self.skipWaiting()) // Aktiviere neuen SW sofort
+      .catch(err => console.error('[SW] Caching fehlgeschlagen während Installation:', err))
   );
 });
 
-// Aktivierung: Alte Caches löschen (optional, aber empfohlen)
+// Aktivieren: Alte Caches löschen
 self.addEventListener('activate', event => {
-  console.log('[Service Worker] Aktiviere...');
+  console.log('[SW] Aktiviere v2...');
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log('[Service Worker] Lösche alten Cache:', cacheName);
+            console.log('[SW] Lösche alten Cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -70,53 +43,38 @@ self.addEventListener('activate', event => {
 
 // Fetch: Anfragen abfangen und aus Cache bedienen (Cache First für gecachte URLs)
 self.addEventListener('fetch', event => {
-  // Prüfe, ob die angefragte URL im Cache sein sollte
-  const requestUrl = new URL(event.request.url);
-  // Prüfe, ob die URL in urlsToCache ist ODER ob es die Start-URL ist
-  const shouldCache = urlsToCache.includes(requestUrl.pathname) || urlsToCache.includes(requestUrl.href) || requestUrl.pathname === '/';
-
-  if (shouldCache) {
-      // Cache First Strategie
-      event.respondWith(
-          caches.match(event.request)
-              .then(response => {
-                  if (response) {
-                      // console.log('[Service Worker] Bediene aus Cache:', event.request.url);
-                      return response; // Aus Cache bedienen
-                  }
-                  // console.log('[Service Worker] Nicht im Cache, fetche vom Netzwerk:', event.request.url);
-                  // Wichtig: Original-Request klonen, da er nur einmal gelesen werden kann
-                  const fetchRequest = event.request.clone();
-                  return fetch(fetchRequest).then(
-                      networkResponse => {
-                          // Prüfen ob gültige Antwort vom Netzwerk kam
-                          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-                              // Nur gültige 'basic' (gleiche Origin) Antworten cachen, um Fehler zu vermeiden
-                              // CDN-Ressourcen werden bei 'install' gecached (mit no-cors)
-                              return networkResponse;
-                          }
-
-                          // Antwort klonen, da sie nur einmal gelesen werden kann
-                          const responseToCache = networkResponse.clone();
-
-                          caches.open(CACHE_NAME)
-                              .then(cache => {
-                                  // console.log('[Service Worker] Cache Netzwerk-Antwort für:', event.request.url);
-                                  cache.put(event.request, responseToCache);
-                              });
-
-                          return networkResponse; // Netzwerk-Antwort zurückgeben
-                      }
-                  ).catch(error => {
-                      console.error('[Service Worker] Fetch fehlgeschlagen:', error);
-                      // Optional: Fallback auf eine Offline-Seite, falls gecached
-                      // return caches.match('/offline.html');
-                  });
-              })
-      );
-  } else {
-      // Wenn nicht im Cache vorgesehen, einfach normal fetchen
-      // console.log('[Service Worker] Ignoriere Request (nicht im Cache vorgesehen):', event.request.url);
-      event.respondWith(fetch(event.request));
+  // Nur GET-Anfragen behandeln
+  if (event.request.method !== 'GET') {
+    return;
   }
+
+  // Nur Anfragen für Ressourcen im selben Ursprung (keine CDNs etc.) abfangen
+  if (!event.request.url.startsWith(self.location.origin)) {
+      // console.log('[SW] Ignoriere externe Anfrage:', event.request.url);
+      return;
+  }
+
+  // Cache-first Strategie
+  event.respondWith(
+    caches.match(event.request)
+      .then(cachedResponse => {
+        // Gebe gecachte Antwort zurück, falls vorhanden
+        if (cachedResponse) {
+          // console.log('[SW] Bediene aus Cache:', event.request.url);
+          return cachedResponse;
+        }
+
+        // Ansonsten: Vom Netzwerk fetchen
+        // console.log('[SW] Fetche vom Netzwerk:', event.request.url);
+        return fetch(event.request).then(networkResponse => {
+            // WICHTIG: Hier NICHT dynamisch cachen, um Fehler zu vermeiden.
+            // Nur die bei 'install' definierten URLs sind im Cache.
+            return networkResponse;
+        }).catch(error => {
+            console.error('[SW] Netzwerk-Fetch fehlgeschlagen:', error);
+            // Optional: Fallback auf eine Offline-Seite/Ressource
+            // return caches.match('/offline.html');
+        });
+      })
+  );
 });
