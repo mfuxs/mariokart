@@ -21,20 +21,12 @@
          /* Focus visibility */
         *:focus-visible { outline: 2px solid rgb(59 130 246 / 0.5); outline-offset: 2px; border-radius: 2px; }
         /* Styling für Custom Confirm Dialog */
-        .confirm-dialog-backdrop {
-            position: fixed; inset: 0; background-color: rgba(0,0,0,0.6);
-            display: flex; align-items: center; justify-content: center; z-index: 50;
-            opacity: 0; transition: opacity 150ms ease-in-out;
-        }
+        .confirm-dialog-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 50; opacity: 0; transition: opacity 150ms ease-in-out; }
         .confirm-dialog-backdrop.open { opacity: 1; }
-        .confirm-dialog-content {
-            background-color: white; padding: 1.5rem; border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            max-width: 90%; width: 400px;
-            transform: scale(0.95); transition: transform 150ms ease-in-out;
-        }
-         .confirm-dialog-backdrop.open .confirm-dialog-content { transform: scale(1); }
+        .confirm-dialog-content { background-color: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); max-width: 90%; width: 400px; transform: scale(0.95); transition: transform 150ms ease-in-out; }
+        .confirm-dialog-backdrop.open .confirm-dialog-content { transform: scale(1); }
     </style>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
 </head>
 <body class="bg-gray-100">
     <div id="root">
@@ -83,71 +75,19 @@
 
             // --- React Komponenten (createElement) ---
 
-            // NEU: Custom Confirm Dialog Komponente
-            const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, children }) => {
-                // Effekt zum Hinzufügen/Entfernen der 'open' Klasse für Transition
-                useEffect(() => {
-                    if (isOpen) {
-                        // Kurze Verzögerung, damit CSS Transition greift
-                        const timer = setTimeout(() => {
-                            const element = document.getElementById('confirm-dialog');
-                            if (element) element.classList.add('open');
-                        }, 10); // 10ms Verzögerung
-                        return () => clearTimeout(timer);
-                    } else {
-                         const element = document.getElementById('confirm-dialog');
-                         if (element) element.classList.remove('open');
-                    }
-                }, [isOpen]);
-
-                if (!isOpen) return null;
-
-                return createElement('div',
-                    {
-                        id: "confirm-dialog", // ID für CSS Transition
-                        className: "confirm-dialog-backdrop", // Backdrop Styling & Transition
-                        onClick: onClose, // Schliessen bei Klick auf Backdrop
-                        role: "dialog", "aria-modal": "true", "aria-labelledby": "confirm-dialog-title"
-                    },
-                    createElement('div',
-                        {
-                            className: "confirm-dialog-content", // Content Styling & Transition
-                            onClick: e => e.stopPropagation() // Verhindert Schliessen bei Klick in Content
-                        },
-                        // Titel
-                        createElement('h3', { id: "confirm-dialog-title", className: "text-lg font-medium text-gray-900 mb-2" }, title || "Bestätigung"),
-                        // Nachricht (als children übergeben)
-                        createElement('div', { className: "text-sm text-gray-600 mb-4" }, children),
-                        // Button Container
-                        createElement('div', { className: "flex justify-end gap-3" },
-                            // Abbrechen Button
-                            createElement('button', {
-                                type: "button",
-                                onClick: onClose,
-                                className: "px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
-                            }, "Abbrechen"),
-                            // Bestätigen Button
-                            createElement('button', {
-                                type: "button",
-                                onClick: () => { onConfirm(); onClose(); }, // Bestätigen UND Schliessen
-                                className: "px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
-                            }, "Bestätigen")
-                        )
-                    )
-                );
+            const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, children }) => { /* ... unverändert ... */
+                 useEffect(() => { if (isOpen) { const timer = setTimeout(() => { const element = document.getElementById('confirm-dialog'); if (element) element.classList.add('open'); }, 10); return () => clearTimeout(timer); } else { const element = document.getElementById('confirm-dialog'); if (element) element.classList.remove('open'); } }, [isOpen]); if (!isOpen) return null; return createElement('div', { id: "confirm-dialog", className: "confirm-dialog-backdrop", onClick: onClose, role: "dialog", "aria-modal": "true", "aria-labelledby": "confirm-dialog-title" }, createElement('div', { className: "confirm-dialog-content", onClick: e => e.stopPropagation() }, createElement('h3', { id: "confirm-dialog-title", className: "text-lg font-medium text-gray-900 mb-2" }, title || "Bestätigung"), createElement('div', { className: "text-sm text-gray-600 mb-4" }, children), createElement('div', { className: "flex justify-end gap-3" }, createElement('button', { type: "button", onClick: onClose, className: "px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1" }, "Abbrechen"), createElement('button', { type: "button", onClick: () => { onConfirm(); onClose(); }, className: "px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1" }, "Bestätigen") ) ) );
             };
-
 
             const PlayerForm = ({ onAddPlayer }) => { /* ... unverändert ... */
                  const [name, setName] = useState(''); const [elo, setElo] = useState(''); const handleSubmit = (e) => { e.preventDefault(); const eloValue = elo.trim() === '' ? undefined : parseInt(elo, 10); const trimmedName = name.trim(); if (trimmedName) { if (elo.trim() !== '' && (isNaN(eloValue) || !Number.isInteger(eloValue))) { alert("Elo muss eine ganze Zahl sein (oder leer für Standard)."); return; } onAddPlayer(trimmedName, eloValue); setName(''); setElo(''); } else { alert("Spielername darf nicht leer sein."); } }; return createElement( 'form', { onSubmit: handleSubmit, className: "mb-6 p-4 border border-gray-300 rounded-lg shadow bg-white" }, createElement( 'h2', { className: "text-xl font-semibold mb-3 text-gray-700" }, "Neuen Spieler hinzufügen" ), createElement( 'div', { className: "flex flex-col sm:flex-row gap-3 items-stretch sm:items-center" }, createElement('input', { type: "text", value: name, onChange: (e) => setName(e.target.value), placeholder: "Spielername", required: true, "aria-label": "Spielername", className: "flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" }), createElement('input', { type: "number", value: elo, onChange: (e) => setElo(e.target.value), placeholder: `Elo (Standard: ${DEFAULT_ELO})`, step: "1", "aria-label": "Anfangs-Elo (optional)", className: "w-full sm:w-44 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" }), createElement( 'button', { type: "submit", className: "flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out" }, createElement(PlusCircle, { size: 18, className: "mr-1 shrink-0" }), " Hinzufügen" ) ) );
             };
 
-            // Leaderboard löst jetzt nur noch Bestätigungsdialog aus
-            const Leaderboard = ({ players, onRequestDelete }) => { // Prop umbenannt
+            const Leaderboard = ({ players, onRequestDelete }) => {
                 const handleDeleteClick = (player) => {
                     console.log("[Leaderboard] handleDeleteClick aufgerufen für:", player.name);
                     // Rufe Callback in App auf, um Dialog zu zeigen
-                    onRequestDelete(player);
+                    onRequestDelete(player); // Übergibt das Spielerobjekt
                 };
                 // ... Rest der Leaderboard Komponente ...
                  return createElement( 'div', { className: "p-4 border border-gray-300 rounded-lg shadow bg-white" }, createElement('h2', { className: "text-xl font-semibold mb-3 text-gray-700" }, "Rangliste"), players.length === 0 ? createElement('p', { className: "text-gray-500 italic" }, "Noch keine Spieler hinzugefügt.") : createElement( 'div', { className: "overflow-x-auto" }, createElement( 'table', { className: "min-w-full divide-y divide-gray-200" }, createElement( 'thead', { className: "bg-gray-50" }, createElement( 'tr', null, createElement('th', { className: "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16" }, "Rang"), createElement('th', { className: "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Name"), createElement('th', { className: "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24" }, "Elo"), createElement('th', { className: "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20" }, "Aktion") ) ), createElement( 'tbody', { className: "bg-white divide-y divide-gray-200" }, players.map((player, index) => createElement( 'tr', { key: player.id, className: "hover:bg-gray-50 transition-colors duration-150" }, createElement('td', { className: "px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 text-center" }, index + 1), createElement('td', { className: "px-4 py-2 whitespace-nowrap text-sm text-gray-700" }, player.name), createElement('td', { className: "px-4 py-2 whitespace-nowrap text-sm text-gray-700" }, player.elo), createElement( 'td', { className: "px-4 py-2 whitespace-nowrap text-sm" }, createElement( 'button', { onClick: () => handleDeleteClick(player), className: "text-red-600 hover:text-red-800 transition-colors duration-150", title: `Spieler ${player.name} löschen`, "aria-label": `Spieler ${player.name} löschen` }, createElement(Trash2, { size: 18 }) ) ) )) ) ) ) );
@@ -157,16 +97,17 @@
                  const [selectedPlayerIds, setSelectedPlayerIds] = useState([]); const [totalPoints, setTotalPoints] = useState({}); const [showAdvanced, setShowAdvanced] = useState(false); const [settings, setSettings] = useState({ races: 4, cc: 150, cpu: 'schwer' }); useEffect(() => { if (selectedPlayerIds.length === 0 && lastPlayerIds && lastPlayerIds.length >= 2) { const validLastPlayerIds = lastPlayerIds.filter(id => players.some(p => p.id === id)); if (validLastPlayerIds.length >= 2) { console.log("Pre-selecting last players:", validLastPlayerIds); setSelectedPlayerIds(validLastPlayerIds); setTotalPoints({}); } } }, [lastPlayerIds, players]); const availablePlayers = useMemo(() => players.filter(p => !selectedPlayerIds.includes(p.id)), [players, selectedPlayerIds]); const selectedPlayersDetails = useMemo(() => players.filter(p => selectedPlayerIds.includes(p.id)), [players, selectedPlayerIds]); const handlePlayerSelect = (playerId) => { if (selectedPlayerIds.length < 4 && !selectedPlayerIds.includes(playerId)) { const newSelectedIds = [...selectedPlayerIds, playerId]; setSelectedPlayerIds(newSelectedIds); setTotalPoints({}); } }; const handlePlayerRemove = (playerId) => { const newSelectedIds = selectedPlayerIds.filter(id => id !== playerId); setSelectedPlayerIds(newSelectedIds); setTotalPoints({}); }; const handlePointsChange = (playerId, points) => { const pointsStr = points.trim(); if (pointsStr === '') { setTotalPoints(prev => ({ ...prev, [playerId]: '' })); return; } const pointsValue = parseInt(pointsStr, 10); const maxPoints = settings.races * 15; if (!isNaN(pointsValue) && pointsValue >= 0 && pointsValue <= maxPoints) { setTotalPoints(prev => ({ ...prev, [playerId]: pointsValue })); } else if (!isNaN(pointsValue) && pointsValue > maxPoints) { alert(`Maximale Punktzahl bei ${settings.races} Rennen ist ${maxPoints}.`); setTotalPoints(prev => ({ ...prev, [playerId]: '' })); } else { alert("Punkte müssen eine positive Zahl sein."); setTotalPoints(prev => ({ ...prev, [playerId]: '' })); } }; const handleSettingsChange = (e) => { const { name, value } = e.target; setSettings(prev => ({ ...prev, [name]: (name === 'races' || name === 'cc') ? parseInt(value, 10) : value })); }; const handleSubmit = (e) => { e.preventDefault(); if (selectedPlayerIds.length < 2) { alert("Bitte mindestens 2 Spieler auswählen."); return; } const numPlayers = selectedPlayerIds.length; const validPoints = selectedPlayerIds.reduce((acc, id) => { const points = totalPoints[id]; if (points !== '' && points !== null && points !== undefined && !isNaN(parseInt(points, 10)) && parseInt(points, 10) >= 0) { acc[id] = parseInt(points, 10); } return acc; }, {}); if (Object.keys(validPoints).length !== selectedPlayerIds.length) { alert(`Bitte für alle ${selectedPlayerIds.length} ausgewählten Spieler die Gesamtpunktzahl eintragen.`); return; } onGameRecorded(selectedPlayerIds, validPoints, settings); setTotalPoints({}); }; const isSubmitDisabled = selectedPlayerIds.length < 2 || selectedPlayerIds.some(id => totalPoints[id] === undefined || totalPoints[id] === ''); return createElement('form', { onSubmit: handleSubmit, className: "mb-6 p-4 border border-gray-300 rounded-lg shadow bg-white" }, createElement('h2', { className: "text-xl font-semibold mb-3 text-gray-700" }, "Neues Spiel eintragen"), createElement('div', { className: "mb-4" }, createElement('label', { className: "block text-sm font-medium text-gray-600 mb-1" }, "Spieler auswählen (2-4):"), createElement('div', { className: "flex flex-wrap gap-2 mb-2 min-h-[38px] items-center" }, selectedPlayersDetails.map(player => createElement('div', { key: player.id, className: "flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium" }, player.name, createElement('button', { type: "button", onClick: () => handlePlayerRemove(player.id), className: "ml-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-200 p-0.5", "aria-label": `Spieler ${player.name} entfernen` }, createElement(X, { size: 14, strokeWidth: 3 }) ) ) ) ), selectedPlayerIds.length < 4 && availablePlayers.length > 0 && createElement('select', { onChange: (e) => handlePlayerSelect(e.target.value), value: "", className: "p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-auto", disabled: selectedPlayerIds.length >= 4, "aria-label": "Weiteren Spieler zum Spiel hinzufügen" }, createElement('option', { value: "", disabled: true }, "-- Spieler hinzufügen --"), availablePlayers.map(player => createElement('option', { key: player.id, value: player.id }, `${player.name} (${player.elo})`) ) ), selectedPlayerIds.length >= 4 && createElement('p', { className: "text-sm text-gray-500 mt-1" }, "Maximale Spieleranzahl (4) erreicht."), availablePlayers.length === 0 && selectedPlayerIds.length < 4 && players.length > 0 && createElement('p', { className: "text-sm text-gray-500 mt-1" }, "Keine weiteren Spieler verfügbar."), players.length === 0 && createElement('p', { className: "text-sm text-gray-500 mt-1" }, "Bitte zuerst Spieler hinzufügen.") ), selectedPlayerIds.length >= 2 && createElement('div', { className: "mb-4" }, createElement('label', { className: "block text-sm font-medium text-gray-600 mb-2" }, `Gesamtpunkte eingeben (max. ${settings.races * 15} bei ${settings.races} Rennen):`), createElement('div', { className: "grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3" }, selectedPlayersDetails.map((player) => createElement('div', { key: player.id, className: "flex items-center gap-2" }, createElement('label', { htmlFor: `points-${player.id}`, className: "font-medium w-2/5 truncate", title: player.name }, `${player.name}:`), createElement('input', { id: `points-${player.id}`, type: "number", min: "0", max: settings.races * 15, step: "1", value: totalPoints[player.id] ?? '', onChange: (e) => handlePointsChange(player.id, e.target.value), placeholder: `Punkte`, className: "w-3/5 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none", required: true }) ) ) ) ), createElement('div', { className: "mb-4" }, createElement('button', { type: "button", onClick: () => setShowAdvanced(!showAdvanced), className: "text-sm text-blue-600 hover:text-blue-800 flex items-center", "aria-expanded": showAdvanced }, createElement(Settings, { size: 16, className: "mr-1" }), ` Erweiterte Einstellungen ${showAdvanced ? 'ausblenden' : 'anzeigen'}` ) ), showAdvanced && createElement('div', { className: "mb-4 p-3 border border-gray-200 rounded-md bg-gray-50 grid grid-cols-1 sm:grid-cols-3 gap-4" }, createElement('div', null, createElement('label', { htmlFor: "races", className: "block text-sm font-medium text-gray-600 mb-1" }, "Rennen:"), createElement('select', { id: "races", name: "races", value: settings.races, onChange: handleSettingsChange, className: "w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" }, [4, 6, 8, 10, 12].map(r => createElement('option', { key: r, value: r }, r)) ) ), createElement('div', null, createElement('label', { htmlFor: "cc", className: "block text-sm font-medium text-gray-600 mb-1" }, "CC-Klasse:"), createElement('select', { id: "cc", name: "cc", value: settings.cc, onChange: handleSettingsChange, className: "w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" }, [50, 100, 150, 200].map(c => createElement('option', { key: c, value: c }, `${c}cc`)) ) ), createElement('div', null, createElement('label', { htmlFor: "cpu", className: "block text-sm font-medium text-gray-600 mb-1" }, "CPU:"), createElement('select', { id: "cpu", name: "cpu", value: settings.cpu, onChange: handleSettingsChange, className: "w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" }, createElement('option', { value: "keine" }, "Keine"), createElement('option', { value: "leicht" }, "Leicht"), createElement('option', { value: "mittel" }, "Mittel"), createElement('option', { value: "schwer" }, "Schwer") ) ) ), createElement('button', { type: "submit", disabled: isSubmitDisabled, className: "w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out" }, "Spiel speichern & Elo berechnen") );
             };
 
-            // ImportExportModal löst jetzt Bestätigungsdialog aus
-            const ImportExportModal = ({ isOpen, onClose, players, onRequestImportConfirm }) => { // Prop umbenannt
+            const ImportExportModal = ({ isOpen, onClose, players, onRequestImportConfirm }) => {
                  const [importData, setImportData] = useState('');
                  const exportData = useMemo(() => { const dataToExport = players.map(({ id, name, elo }) => ({ id, name, elo })); return JSON.stringify(dataToExport, null, 2); }, [players]);
 
                  const handleImportClick = () => {
                      console.log("[Modal] handleImportClick aufgerufen.");
                      if (importData.trim() === '') { alert("Importfeld ist leer."); return; }
-                     // Rufe Callback in App auf, um Dialog zu zeigen
-                     onRequestImportConfirm(importData);
+                     // --- Bestätigung ENTFERNT für TEST ---
+                     console.log("[Modal] Bestätigung übersprungen (DEBUG). Rufe onRequestImportConfirm Prop auf.");
+                     onRequestImportConfirm(importData); // Rufe Callback von App auf, um Dialog zu zeigen
+                     // --- Ende Entfernung ---
                  };
 
                  if (!isOpen) return null;
@@ -179,115 +120,61 @@
                 const [players, setPlayers] = useState([]);
                 const [isModalOpen, setIsModalOpen] = useState(false); // Für Import/Export Hauptmodal
                 const [lastPlayerIds, setLastPlayerIds] = useState([]);
+                const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
+                // const [importDataToConfirm, setImportDataToConfirm] = useState(''); // Nicht mehr benötigt
 
-                // State für Bestätigungsdialoge
-                const [confirmState, setConfirmState] = useState({
-                    isOpen: false,
-                    title: '',
-                    message: '',
-                    onConfirm: () => {} // Leere Funktion als Standard
-                });
-
-                // State für zu importierende Daten (wird vom Dialog verwendet)
-                const [importDataToConfirm, setImportDataToConfirm] = useState('');
-
-                // Effekt zum Laden aus localStorage beim Start
-                useEffect(() => { /* ... unverändert ... */
-                     console.log("Versuche Daten aus localStorage zu laden..."); try { const storedPlayers = localStorage.getItem(LOCAL_STORAGE_KEY); if (storedPlayers) { const parsedPlayers = JSON.parse(storedPlayers); if (Array.isArray(parsedPlayers)) { setPlayers(parsedPlayers); console.log("Spielerdaten erfolgreich aus localStorage geladen."); } else { console.warn("Ungültige Daten im localStorage gefunden."); } } else { console.log("Keine Spielerdaten im localStorage gefunden."); } } catch (error) { console.error("Fehler beim Laden/Parsen aus localStorage:", error); }
-                }, []);
-
-                // Effekt zum Speichern in localStorage bei Spieleränderungen
-                useEffect(() => { /* ... unverändert ... */
-                      if (players.length > 0 || localStorage.getItem(LOCAL_STORAGE_KEY) !== null) { console.log("Speichere Spielerdaten in localStorage..."); try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(players)); console.log("Spielerdaten erfolgreich gespeichert."); } catch (error) { console.error("Fehler beim Speichern in localStorage:", error); alert("Fehler beim Speichern der Daten. Möglicherweise ist der Speicherplatz voll."); } }
-                }, [players]);
-
-                // Effekt für Body-Scrolling bei Modal
-                useEffect(() => {
-                    // Verhindert Scrollen, wenn irgendein Modal offen ist
-                    const isAnyModalOpen = isModalOpen || confirmState.isOpen;
-                    if (isAnyModalOpen) { document.body.style.overflow = 'hidden'; }
-                    else { document.body.style.overflow = 'auto'; }
-                    return () => { document.body.style.overflow = 'auto'; };
-                }, [isModalOpen, confirmState.isOpen]);
-
+                // Lade-/Speicher-Effekte (unverändert)
+                useEffect(() => { console.log("Versuche Daten aus localStorage zu laden..."); try { const storedPlayers = localStorage.getItem(LOCAL_STORAGE_KEY); if (storedPlayers) { const parsedPlayers = JSON.parse(storedPlayers); if (Array.isArray(parsedPlayers)) { setPlayers(parsedPlayers); console.log("Spielerdaten erfolgreich aus localStorage geladen."); } else { console.warn("Ungültige Daten im localStorage gefunden."); } } else { console.log("Keine Spielerdaten im localStorage gefunden."); } } catch (error) { console.error("Fehler beim Laden/Parsen aus localStorage:", error); } }, []);
+                useEffect(() => { if (players.length > 0 || localStorage.getItem(LOCAL_STORAGE_KEY) !== null) { console.log("Speichere Spielerdaten in localStorage..."); try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(players)); console.log("Spielerdaten erfolgreich gespeichert."); } catch (error) { console.error("Fehler beim Speichern in localStorage:", error); alert("Fehler beim Speichern der Daten. Möglicherweise ist der Speicherplatz voll."); } } }, [players]);
+                useEffect(() => { const isAnyModalOpen = isModalOpen || confirmState.isOpen; if (isAnyModalOpen) { document.body.style.overflow = 'hidden'; } else { document.body.style.overflow = 'auto'; } return () => { document.body.style.overflow = 'auto'; }; }, [isModalOpen, confirmState.isOpen]);
 
                 // --- State Management & Dialog-Funktionen ---
-                const handleAddPlayer = useCallback((name, elo = DEFAULT_ELO) => { /* ... unverändert ... */
-                    const trimmedName = name.trim(); if (!trimmedName) return; const initialElo = parseInt(elo, 10); const validElo = !isNaN(initialElo) ? initialElo : DEFAULT_ELO; const newPlayer = { id: crypto.randomUUID(), name: trimmedName, elo: validElo }; setPlayers(prevPlayers => [...prevPlayers, newPlayer].sort((a, b) => b.elo - a.elo)); console.log("Spieler hinzugefügt:", newPlayer);
-                }, []);
+                const handleAddPlayer = useCallback((name, elo = DEFAULT_ELO) => { /* ... unverändert ... */ const trimmedName = name.trim(); if (!trimmedName) return; const initialElo = parseInt(elo, 10); const validElo = !isNaN(initialElo) ? initialElo : DEFAULT_ELO; const newPlayer = { id: crypto.randomUUID(), name: trimmedName, elo: validElo }; setPlayers(prevPlayers => [...prevPlayers, newPlayer].sort((a, b) => b.elo - a.elo)); console.log("Spieler hinzugefügt:", newPlayer); }, []);
 
-                // Funktion, die vom Leaderboard aufgerufen wird, um Lösch-Dialog zu zeigen
+                // Zeigt Lösch-Dialog
                 const requestDeleteConfirmation = useCallback((player) => {
                     console.log("[App] requestDeleteConfirmation für:", player.name);
-                    setConfirmState({
-                        isOpen: true,
-                        title: "Löschen bestätigen",
-                        message: `Sicher, dass du ${player.name} (Elo: ${player.elo}) löschen möchtest?`,
-                        onConfirm: () => handleDeletePlayer(player.id) // Funktion, die bei Bestätigung ausgeführt wird
-                    });
-                }, []); // Keine Abhängigkeiten nötig, da setConfirmState stabil ist
+                    setConfirmState({ isOpen: true, title: "Löschen bestätigen", message: `Sicher, dass du ${player.name} (Elo: ${player.elo}) löschen möchtest?`, onConfirm: () => handleDeletePlayer(player.id) });
+                }, []); // Keine Abhängigkeit von 'players' hier
 
-                // Die eigentliche Löschfunktion
+                // Führt Löschen aus (wird vom Dialog aufgerufen)
                 const handleDeletePlayer = useCallback((playerId) => {
-                     console.log("[App] handleDeletePlayer (nach Bestätigung) aufgerufen für ID:", playerId);
-                     setPlayers(prevPlayers => {
-                         const newPlayers = prevPlayers.filter(p => p.id !== playerId);
-                         console.log("[App] Neuer Player-State nach Filter:", newPlayers);
-                         return newPlayers;
-                     });
-                     console.log("[App] setPlayers für Delete aufgerufen.");
+                     console.log("[App] handleDeletePlayer (nach Bestätigung) aufgerufen für ID:", playerId); setPlayers(prevPlayers => { const newPlayers = prevPlayers.filter(p => p.id !== playerId); console.log("[App] Neuer Player-State nach Filter:", newPlayers); return newPlayers; }); console.log("[App] setPlayers für Delete aufgerufen.");
                 }, []);
 
                 const handleRecordGame = useCallback((playerIds, totalPoints, settings) => { /* ... unverändert ... */
                      console.log("Recording game:", playerIds, totalPoints, settings); const playersInGame = players.filter(p => playerIds.includes(p.id)); if (playersInGame.length < 2) return; const eloChanges = calculateEloChanges(playersInGame, totalPoints, settings); console.log("Elo Changes:", eloChanges); setPlayers(prevPlayers => prevPlayers.map(p => { if (eloChanges[p.id] !== undefined) { const newElo = p.elo + eloChanges[p.id]; return { ...p, elo: Math.max(100, newElo) }; } return p; }).sort((a, b) => b.elo - a.elo) ); setLastPlayerIds(playerIds);
                  }, [players]);
 
-                 // Funktion, die vom Import-Modal aufgerufen wird, um Dialog zu zeigen
+                 // Zeigt Import-Dialog
                  const requestImportConfirmation = useCallback((jsonData) => {
                      console.log("[App] requestImportConfirmation aufgerufen.");
-                     setImportDataToConfirm(jsonData); // Speichere die zu importierenden Daten temporär
-                     setConfirmState({
-                         isOpen: true,
-                         title: "Import bestätigen",
-                         message: "Achtung: Das Importieren überschreibt alle aktuellen Spielerdaten und Ranglisten. Fortfahren?",
-                         onConfirm: handleImportPlayers // Funktion, die bei Bestätigung ausgeführt wird
-                     });
-                 }, []); // Keine Abhängigkeiten nötig
+                     // Erstelle die onConfirm Funktion mit den jsonData im Closure
+                     const confirmAction = () => executeImportLogic(jsonData);
+                     setConfirmState({ isOpen: true, title: "Import bestätigen", message: "Achtung: Das Importieren überschreibt alle aktuellen Spielerdaten und Ranglisten. Fortfahren?", onConfirm: confirmAction });
+                 }, []); // Keine Abhängigkeiten hier
 
-                 // Die eigentliche Importfunktion (wird von onConfirm des Dialogs aufgerufen)
-                 const handleImportPlayers = useCallback(() => {
-                      console.log("[App] handleImportPlayers (nach Bestätigung) aufgerufen.");
-                      const jsonData = importDataToConfirm; // Hole gespeicherte Daten
-                      setImportDataToConfirm(''); // Lösche temporäre Daten
-                      if (!jsonData) { console.error("Keine Importdaten zum Verarbeiten vorhanden."); return false; }
+                 // Führt Import aus (wird vom Dialog aufgerufen)
+                 const executeImportLogic = useCallback((jsonData) => { // Nimmt jsonData als Argument
+                      console.log("[App] executeImportLogic aufgerufen.");
+                      if (!jsonData) { console.error("Keine Importdaten zum Verarbeiten vorhanden (Argument war leer)."); alert("Import fehlgeschlagen: Keine Daten empfangen."); return false; }
                       try {
-                          const importedData = JSON.parse(jsonData);
-                           console.log("[App] Import - Geparsed:", importedData);
-                          if (!Array.isArray(importedData)) throw new Error("Importdaten müssen ein Array sein.");
+                          const importedData = JSON.parse(jsonData); console.log("[App] Import - Geparsed:", importedData); if (!Array.isArray(importedData)) throw new Error("Importdaten müssen ein Array sein.");
                           const validPlayers = importedData.map((item, index) => { if (typeof item !== 'object' || item === null) return null; const name = String(item.name || '').trim(); const elo = parseInt(item.elo, 10); if (!name || isNaN(elo)) { console.warn(`Ungültiger Eintrag bei Index ${index} übersprungen.`); return null; } return { id: typeof item.id === 'string' && item.id.trim() ? item.id.trim() : crypto.randomUUID(), name: name, elo: elo }; }).filter(p => p !== null);
-                           console.log("[App] Import - Validiert:", validPlayers);
-                          if (validPlayers.length === 0 && importedData.length > 0) { throw new Error("Keine gültigen Spielerdaten im Import gefunden."); }
+                          console.log("[App] Import - Validiert:", validPlayers); if (validPlayers.length === 0 && importedData.length > 0) { throw new Error("Keine gültigen Spielerdaten im Import gefunden."); }
                           setPlayers(validPlayers.sort((a, b) => b.elo - a.elo));
-                          setLastPlayerIds([]);
-                          console.log("[App] Import erfolgreich, State gesetzt.");
-                          alert(`Import erfolgreich: ${validPlayers.length} Spieler geladen.`);
-                          return true; // Wichtig für Modal zum Schliessen
+                          setLastPlayerIds([]); console.log("[App] Import erfolgreich, State gesetzt."); alert(`Import erfolgreich: ${validPlayers.length} Spieler geladen.`); return true;
                       } catch (error) {
-                          console.error("Import fehlgeschlagen:", error);
-                          alert(`Import fehlgeschlagen: ${error.message}`);
-                          return false; // Wichtig für Modal
+                          console.error("Import fehlgeschlagen:", error); alert(`Import fehlgeschlagen: ${error.message}`); return false;
                       }
-                 }, [importDataToConfirm]); // Abhängig von den temporären Daten
+                 }, []); // Keine Abhängigkeiten vom State hier
 
-                 // Funktion zum Schliessen des Bestätigungsdialogs
-                 const closeConfirmDialog = () => {
-                     setConfirmState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
-                     setImportDataToConfirm(''); // Auch temporäre Importdaten löschen
-                 };
+                 // Schliesst den Bestätigungsdialog
+                 const closeConfirmDialog = () => { setConfirmState({ isOpen: false, title: '', message: '', onConfirm: () => {} }); };
 
                 // --- Rendern der App-Struktur ---
                 console.log("[App] Rendere App mit players:", players);
-                return createElement( Fragment, null, // Benutze Fragment, um Modals neben Haupt-Div zu rendern
+                return createElement( Fragment, null,
                     createElement( 'div', { className: "min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 p-4 sm:p-8 font-sans" },
                         createElement( 'div', { className: "max-w-4xl mx-auto bg-white/90 backdrop-blur-sm p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200" },
                             createElement( 'header', { className: "mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-gray-200 pb-4" }, /* ... Header ... */
@@ -296,25 +183,13 @@
                             createElement( 'main', { className: "space-y-6" },
                                 createElement(PlayerForm, { onAddPlayer: handleAddPlayer }),
                                 createElement(GameForm, { players: players, onGameRecorded: handleRecordGame, lastPlayerIds: lastPlayerIds }),
-                                createElement(Leaderboard, { players: players, onRequestDelete: requestDeleteConfirmation }) // Prop geändert
+                                createElement(Leaderboard, { players: players, onRequestDelete: requestDeleteConfirmation })
                             ),
                             createElement( 'footer', { className: "mt-8 pt-4 border-t border-gray-200 text-center text-xs sm:text-sm text-gray-500" }, "Elo-Berechnung basiert auf Punkten & K=", K_BASE, " (Basis).", createElement('br', { className: "hidden sm:block" }), " Daten werden lokal im Browser gespeichert." )
                         )
                     ),
-                    // Haupt-Import/Export-Modal
-                     createElement(ImportExportModal, {
-                         isOpen: isModalOpen,
-                         onClose: () => setIsModalOpen(false),
-                         players: players,
-                         onRequestImportConfirm: requestImportConfirmation // Prop geändert
-                     }),
-                    // Allgemeiner Bestätigungsdialog (wird für Löschen und Import verwendet)
-                    createElement(ConfirmDialog, {
-                        isOpen: confirmState.isOpen,
-                        onClose: closeConfirmDialog,
-                        onConfirm: confirmState.onConfirm, // Führt die spezifische Aktion aus (Löschen oder Import)
-                        title: confirmState.title
-                    }, confirmState.message) // Nachricht als Child übergeben
+                     createElement(ImportExportModal, { isOpen: isModalOpen, onClose: () => setIsModalOpen(false), players: players, onRequestImportConfirm: requestImportConfirmation }),
+                     createElement(ConfirmDialog, { isOpen: confirmState.isOpen, onClose: closeConfirmDialog, onConfirm: confirmState.onConfirm, title: confirmState.title }, confirmState.message)
                 );
             };
             // --- Rendere die App Komponente ---
@@ -333,3 +208,11 @@
 
 </body>
 </html>
+```
+
+**Zusammenfassung der Änderungen:**
+
+* **Löschen:** Verwendet jetzt den internen `ConfirmDialog`. Wenn du auf den Mülleimer klickst, sollte der Dialog erscheinen. Klickst du dort auf "Bestätigen", wird der Spieler gelöscht.
+* **Import:** Wenn du im Import/Export-Fenster auf den Button klickst, wird jetzt ebenfalls der interne `ConfirmDialog` angezeigt. Klickst du dort auf "Bestätigen", werden die Daten aus dem Textfeld importiert.
+
+Bitte teste beide Funktionen erneut. Sie sollten jetzt ohne die blockierten Browser-Pop-ups funktionier
