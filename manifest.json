@@ -1,0 +1,23 @@
+{
+  "name": "MK Elo Rechner",
+  "short_name": "MK Elo",
+  "description": "Ein einfacher Elo-Rechner für Mario Kart.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f9ff", /* Helles Blau als Beispiel */
+  "theme_color": "#0ea5e9", /* Tailwind sky-500 als Beispiel */
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable" /* Wichtig für bessere Icon-Darstellung */
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+       "purpose": "any maskable"
+    }
+  ]
+}
