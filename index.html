@@ -98,7 +98,7 @@
             };
 
             // --- App Komponente (verwaltet State und Dialoge) ---
-            const App = () => { /* ... State und Funktionen unverändert ... */
+            const App = () => { /* ... unverändert ... */
                 const [players, setPlayers] = useState([]); const [isModalOpen, setIsModalOpen] = useState(false); const [lastPlayerIds, setLastPlayerIds] = useState([]); const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
                 useEffect(() => { console.log("Versuche Daten aus localStorage zu laden..."); try { const storedPlayers = localStorage.getItem(LOCAL_STORAGE_KEY); if (storedPlayers) { const parsedPlayers = JSON.parse(storedPlayers); if (Array.isArray(parsedPlayers)) { setPlayers(parsedPlayers); console.log("Spielerdaten erfolgreich aus localStorage geladen."); } else { console.warn("Ungültige Daten im localStorage gefunden."); } } else { console.log("Keine Spielerdaten im localStorage gefunden."); } } catch (error) { console.error("Fehler beim Laden/Parsen aus localStorage:", error); } }, []);
                 useEffect(() => { if (players.length > 0 || localStorage.getItem(LOCAL_STORAGE_KEY) !== null) { console.log("Speichere Spielerdaten in localStorage..."); try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(players)); console.log("Spielerdaten erfolgreich gespeichert."); } catch (error) { console.error("Fehler beim Speichern in localStorage:", error); alert("Fehler beim Speichern der Daten. Möglicherweise ist der Speicherplatz voll."); } } }, [players]);
@@ -122,6 +122,25 @@
             root.render(createElement(App)); // Rendere die Haupt-App
             console.log("App Render initiiert.");
 
+            // --- NEU: Service Worker Registrierung ---
+            if ('serviceWorker' in navigator) {
+              console.log("Versuche Service Worker zu registrieren...");
+              // Verwende relativen Pfad, wichtig für GitHub Pages Subdirectory
+              navigator.serviceWorker.register('service-worker.js')
+                .then(registration => {
+                  console.log('Service Worker erfolgreich registriert mit Scope:', registration.scope);
+                })
+                .catch(error => {
+                  console.error('Service Worker Registrierung fehlgeschlagen:', error);
+                  // Optional: Fehler dem Benutzer anzeigen
+                  // showStatus(`Service Worker Registrierung fehlgeschlagen: ${error.message}`, true);
+                });
+            } else {
+                 console.warn("Service Worker wird von diesem Browser nicht unterstützt.");
+            }
+            // --- Ende Service Worker Registrierung ---
+
+
         } catch (error) {
             // Fange alle Fehler ab
             showStatus(`Fehler bei der Initialisierung der App: ${error.message}`, true);
@@ -131,3 +150,33 @@
 
 </body>
 </html>
+```
+
+**2. Aktualisierter Inhalt für `manifest.json`**
+(Stellt sicher, dass Icon-Pfade relativ sind)
+
+
+```json
+{
+  "name": "MK Elo Rechner",
+  "short_name": "MK Elo",
+  "description": "Ein einfacher Elo-Rechner für Mario Kart.",
+  "start_url": ".", /* Startet im aktuellen Verzeichnis */
+  "display": "standalone", /* Wichtig für App-Feeling */
+  "background_color": "#f0f9ff", /* Helles Blau als Beispiel */
+  "theme_color": "#0ea5e9", /* Tailwind sky-500 als Beispiel */
+  "icons": [
+    {
+      "src": "icons/icon-192x192.png", /* Relativer Pfad */
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512x512.png", /* Relativer Pfad */
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
