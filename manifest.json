@@ -1,24 +1,15 @@
 {
   "name": "MK Elo Rechner",
-  "short_name": "MK Elo",
-  "description": "Ein einfacher Elo-Rechner für Mario Kart.",
-  "start_url": ".",
-  "scope": ".", /* NEU: Expliziter Scope */
+  "short_name": "MK Elo",
+  "description": "Ein einfacher Elo‑Rechner für Mario Kart.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f0f9ff",
   "theme_color": "#0ea5e9",
   "icons": [
-    {
-      "src": "icons/icon-192x192.png", /* Relativer Pfad */
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512x512.png", /* Relativer Pfad */
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-180x180.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
   ]
 }
