@@ -1,150 +1,79 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+    <!-- Basis‑Pfad für alle relativen URLs auf GitHub Pages  --------------- -->
+    <base href="/mariokart/">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mario Kart Elo Rechner</title>
 
+    <title>Mario Kart Elo Rechner</title>
+    <meta name="description" content="Ein einfacher Elo‑Rechner für Mario Kart.">
+
+    <!-- PWA Manifest & Theme ----------------------------------------------- -->
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
 
-    <meta name="theme-color" content="#ffffff"> <link rel="icon" href="icons/icon-192x192.png" type="image/png">
-
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-
+    <!-- Apple PWA‑Meta‑Tags -------------------------------------------------- -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="MK Elo Rechner">
+    <meta name="apple-mobile-web-app-title" content="MK Elo Rechner">
 
+    <!-- Apple‑Touch‑Icons (wird fürs Homescreen‑Icon verwendet) ------------- -->
+    <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167x167.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
+
+    <!-- Favicon für klassische Browser -------------------------------------- -->
+    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
+
+    <!-- Fonts & Tailwind ----------------------------------------------------- -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -------------------------------------------------------- -->
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        svg { display: inline-block; vertical-align: middle; }
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
-        textarea.resize-none { resize: none; }
-        /* Scrollbar styling */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #a8a8a8; border-radius: 10px; border: 2px solid #f1f1f1; }
-        ::-webkit-scrollbar-thumb:hover { background: #7a7a7a; }
-         /* Focus visibility */
-        *:focus-visible { outline: 2px solid rgb(59 130 246 / 0.5); outline-offset: 2px; border-radius: 2px; }
-        /* Styling für Custom Confirm Dialog */
-        .confirm-dialog-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 50; opacity: 0; transition: opacity 150ms ease-in-out; }
-        .confirm-dialog-backdrop.open { opacity: 1; }
-        .confirm-dialog-content { background-color: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); max-width: 90%; width: 400px; transform: scale(0.95); transition: transform 150ms ease-in-out; }
-        .confirm-dialog-backdrop.open .confirm-dialog-content { transform: scale(1); }
+        body{font-family:'Inter',sans-serif}
+        svg{display:inline-block;vertical-align:middle}
+        button:disabled{opacity:.6;cursor:not-allowed}
+        textarea.resize-none{resize:none}
+        /* Scrollbar */
+        ::-webkit-scrollbar{width:8px;height:8px}
+        ::-webkit-scrollbar-track{background:#f1f1f1;border-radius:10px}
+        ::-webkit-scrollbar-thumb{background:#a8a8a8;border-radius:10px;border:2px solid #f1f1f1}
+        ::-webkit-scrollbar-thumb:hover{background:#7a7a7a}
+        /* Focus */
+        *:focus-visible{outline:2px solid rgb(59 130 246 / .5);outline-offset:2px;border-radius:2px}
+        /* Confirm‑Dialog */
+        .confirm-dialog-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50;opacity:0;transition:opacity .15s}
+        .confirm-dialog-backdrop.open{opacity:1}
+        .confirm-dialog-content{background:#fff;padding:1.5rem;border-radius:.5rem;box-shadow:0 4px 6px -1px rgb(0 0 0 / .1),0 2px 4px -2px rgb(0 0 0 / .1);max-width:90%;width:400px;transform:scale(.95);transition:transform .15s}
+        .confirm-dialog-backdrop.open .confirm-dialog-content{transform:scale(1)}
     </style>
 </head>
+
 <body class="bg-gray-100">
     <div id="root">
-        <p style="padding: 20px; font-family: sans-serif;">Lade App...</p>
+        <p class="p-5 font-sans">Lade App…</p>
     </div>
 
+    <!-- React & React‑DOM  --------------------------------------------------- -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+
+    <!-- Deine gesamte JS‑App (unverändert) ---------------------------------- -->
+    <script src="app.js"></script><!--  ⇐  verschiebe den langen Inline‑Code in eine eigene Datei; GitHub Pages cached das besser -->
+
+    <!-- Service Worker Registrierung ---------------------------------------- -->
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const rootDiv = document.getElementById('root');
-        if (!rootDiv) { console.error("Root element #root nicht gefunden!"); return; }
-
-        // Funktion zur Statusanzeige
-        const showStatus = (message, isError = false) => { /* ... unverändert ... */
-             if (rootDiv) { const color = isError ? 'red' : 'blue'; const bgColor = isError ? '#ffebeb' : '#e0f2fe'; rootDiv.innerHTML = `<div style="color: ${color}; padding: 20px; border: 1px solid ${color}; margin: 20px; font-family: sans-serif; background-color: ${bgColor};"><p style="margin-top: 0;">${message}</p>${isError ? '<p>Bitte überprüfe die Browser-Konsole (öffnen mit F12) für detailliertere Informationen.</p>' : ''}</div>`; } if (isError) { console.error(message); } else { console.log(message); }
-        };
-
-        try {
-            // React Hooks und Funktionen
-            if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
-                 throw new Error('React oder ReactDOM Skript konnte nicht korrekt geladen werden!');
-            }
-            const { useState, useMemo, useEffect, useCallback, Fragment, createElement } = React;
-
-            console.log("React/ReactDOM geladen.");
-
-            // --- Inline SVG Icon Komponenten ---
-            const Icon = ({ size = 24, color = 'currentColor', strokeWidth = 2, children, ...props }) => ( createElement('svg', { xmlns: "http://www.w3.org/2000/svg", width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: strokeWidth, strokeLinecap: "round", strokeLinejoin: "round", ...props }, children) );
-            const PlusCircle = (props) => ( createElement(Icon, props, createElement('circle', {cx:"12", cy:"12", r:"10"}), createElement('path', {d:"M8 12h8"}), createElement('path', {d:"M12 8v8"})) );
-            const Trash2 = (props) => ( createElement(Icon, props, createElement('path', {d:"M3 6h18"}), createElement('path', {d:"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"}), createElement('path', {d:"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"}), createElement('line', {x1:"10", x2:"10", y1:"11", y2:"17"}), createElement('line', {x1:"14", x2:"14", y1:"11", y2:"17"})) );
-            const X = (props) => ( createElement(Icon, props, createElement('path', {d:"M18 6 6 18"}), createElement('path', {d:"m6 6 12 12"})) );
-            const Upload = (props) => ( createElement(Icon, props, createElement('path', {d:"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"}), createElement('polyline', {points:"17 8 12 3 7 8"}), createElement('line', {x1:"12", x2:"12", y1:"3", y2:"15"})) );
-            const Settings = (props) => ( createElement(Icon, props, createElement('path', {d:"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.51a2 2 0 0 1 1-1.72l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"}), createElement('circle', {cx:"12", cy:"12", r:"3"})) );
-            console.log("Icons definiert.");
-
-            // --- Konstanten & Logik ---
-            const DEFAULT_ELO = 1000;
-            const K_BASE = 32;
-            const LOCAL_STORAGE_KEY = 'mariokart-elo-react-state-v1';
-
-            const calculateEloChanges = (playersInGame, totalPoints, settings) => { /* ... unverändert ... */
-                 const numPlayers = playersInGame.length; if (numPlayers < 2) return {}; let kModifierCC = 1.0; if (settings.cc === 100) kModifierCC = 1.05; else if (settings.cc === 150) kModifierCC = 1.1; else if (settings.cc === 200) kModifierCC = 1.2; let kModifierCPU = 1.0; if (settings.cpu === 'leicht') kModifierCPU = 1.05; else if (settings.cpu === 'mittel') kModifierCPU = 1.1; else if (settings.cpu === 'schwer') kModifierCPU = 1.15; const K_final = K_BASE * kModifierCC * kModifierCPU; const eloChanges = {}; playersInGame.forEach(playerI => { let totalDelta = 0; const ratingI = playerI.elo; const pointsI = totalPoints[playerI.id]; playersInGame.forEach(playerJ => { if (playerI.id === playerJ.id) return; const ratingJ = playerJ.elo; const pointsJ = totalPoints[playerJ.id]; const expectedScoreIJ = 1 / (1 + Math.pow(10, (ratingJ - ratingI) / 400)); let actualScoreIJ = 0.5; if (pointsI > pointsJ) { actualScoreIJ = 1; } else if (pointsI < pointsJ) { actualScoreIJ = 0; } totalDelta += K_final * (actualScoreIJ - expectedScoreIJ); }); eloChanges[playerI.id] = Math.round(totalDelta); }); return eloChanges;
-            };
-            console.log("Logik definiert.");
-
-            // --- React Komponenten (createElement) ---
-            const ConfirmDialog = ({ isOpen, onClose, onConfirm, title, children }) => { /* ... unverändert ... */
-                 useEffect(() => { if (isOpen) { const timer = setTimeout(() => { const element = document.getElementById('confirm-dialog'); if (element) element.classList.add('open'); }, 10); return () => clearTimeout(timer); } else { const element = document.getElementById('confirm-dialog'); if (element) element.classList.remove('open'); } }, [isOpen]); if (!isOpen) return null; return createElement('div', { id: "confirm-dialog", className: "confirm-dialog-backdrop", onClick: onClose, role: "dialog", "aria-modal": "true", "aria-labelledby": "confirm-dialog-title" }, createElement('div', { className: "confirm-dialog-content", onClick: e => e.stopPropagation() }, createElement('h3', { id: "confirm-dialog-title", className: "text-lg font-medium text-gray-900 mb-2" }, title || "Bestätigung"), createElement('div', { className: "text-sm text-gray-600 mb-4" }, children), createElement('div', { className: "flex justify-end gap-3" }, createElement('button', { type: "button", onClick: onClose, className: "px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1" }, "Abbrechen"), createElement('button', { type: "button", onClick: () => { onConfirm(); onClose(); }, className: "px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1" }, "Bestätigen") ) ) );
-            };
-            const PlayerForm = ({ onAddPlayer }) => { /* ... unverändert ... */
-                 const [name, setName] = useState(''); const [elo, setElo] = useState(''); const handleSubmit = (e) => { e.preventDefault(); const eloValue = elo.trim() === '' ? undefined : parseInt(elo, 10); const trimmedName = name.trim(); if (trimmedName) { if (elo.trim() !== '' && (isNaN(eloValue) || !Number.isInteger(eloValue))) { alert("Elo muss eine ganze Zahl sein (oder leer für Standard)."); return; } onAddPlayer(trimmedName, eloValue); setName(''); setElo(''); } else { alert("Spielername darf nicht leer sein."); } }; return createElement( 'form', { onSubmit: handleSubmit, className: "mb-6 p-4 border border-gray-300 rounded-lg shadow bg-white" }, createElement( 'h2', { className: "text-xl font-semibold mb-3 text-gray-700" }, "Neuen Spieler hinzufügen" ), createElement( 'div', { className: "flex flex-col sm:flex-row gap-3 items-stretch sm:items-center" }, createElement('input', { type: "text", value: name, onChange: (e) => setName(e.target.value), placeholder: "Spielername", required: true, "aria-label": "Spielername", className: "flex-grow p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" }), createElement('input', { type: "number", value: elo, onChange: (e) => setElo(e.target.value), placeholder: `Elo (Standard: ${DEFAULT_ELO})`, step: "1", "aria-label": "Anfangs-Elo (optional)", className: "w-full sm:w-44 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" }), createElement( 'button', { type: "submit", className: "flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out" }, createElement(PlusCircle, { size: 18, className: "mr-1 shrink-0" }), " Hinzufügen" ) ) );
-            };
-            const Leaderboard = ({ players, onRequestDelete }) => { /* ... unverändert ... */
-                 const handleDeleteClick = (player) => { console.log("[Leaderboard] handleDeleteClick aufgerufen für:", player.name); onRequestDelete(player); }; return createElement( 'div', { className: "p-4 border border-gray-300 rounded-lg shadow bg-white" }, createElement('h2', { className: "text-xl font-semibold mb-3 text-gray-700" }, "Rangliste"), players.length === 0 ? createElement('p', { className: "text-gray-500 italic" }, "Noch keine Spieler hinzugefügt.") : createElement( 'div', { className: "overflow-x-auto" }, createElement( 'table', { className: "min-w-full divide-y divide-gray-200" }, createElement( 'thead', { className: "bg-gray-50" }, createElement( 'tr', null, createElement('th', { className: "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16" }, "Rang"), createElement('th', { className: "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" }, "Name"), createElement('th', { className: "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24" }, "Elo"), createElement('th', { className: "px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20" }, "Aktion") ) ), createElement( 'tbody', { className: "bg-white divide-y divide-gray-200" }, players.map((player, index) => createElement( 'tr', { key: player.id, className: "hover:bg-gray-50 transition-colors duration-150" }, createElement('td', { className: "px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900 text-center" }, index + 1), createElement('td', { className: "px-4 py-2 whitespace-nowrap text-sm text-gray-700" }, player.name), createElement('td', { className: "px-4 py-2 whitespace-nowrap text-sm text-gray-700" }, player.elo), createElement( 'td', { className: "px-4 py-2 whitespace-nowrap text-sm" }, createElement( 'button', { onClick: () => handleDeleteClick(player), className: "text-red-600 hover:text-red-800 transition-colors duration-150", title: `Spieler ${player.name} löschen`, "aria-label": `Spieler ${player.name} löschen` }, createElement(Trash2, { size: 18 }) ) ) )) ) ) ) );
-            };
-            const GameForm = ({ players, onGameRecorded, lastPlayerIds }) => { /* ... unverändert ... */
-                 const [selectedPlayerIds, setSelectedPlayerIds] = useState([]); const [totalPoints, setTotalPoints] = useState({}); const [showAdvanced, setShowAdvanced] = useState(false); const [settings, setSettings] = useState({ races: 4, cc: 150, cpu: 'schwer' }); useEffect(() => { if (selectedPlayerIds.length === 0 && lastPlayerIds && lastPlayerIds.length >= 2) { const validLastPlayerIds = lastPlayerIds.filter(id => players.some(p => p.id === id)); if (validLastPlayerIds.length >= 2) { console.log("Pre-selecting last players:", validLastPlayerIds); setSelectedPlayerIds(validLastPlayerIds); setTotalPoints({}); } } }, [lastPlayerIds, players]); const availablePlayers = useMemo(() => players.filter(p => !selectedPlayerIds.includes(p.id)), [players, selectedPlayerIds]); const selectedPlayersDetails = useMemo(() => players.filter(p => selectedPlayerIds.includes(p.id)), [players, selectedPlayerIds]); const handlePlayerSelect = (playerId) => { if (selectedPlayerIds.length < 4 && !selectedPlayerIds.includes(playerId)) { const newSelectedIds = [...selectedPlayerIds, playerId]; setSelectedPlayerIds(newSelectedIds); setTotalPoints({}); } }; const handlePlayerRemove = (playerId) => { const newSelectedIds = selectedPlayerIds.filter(id => id !== playerId); setSelectedPlayerIds(newSelectedIds); setTotalPoints({}); }; const handlePointsChange = (playerId, points) => { const pointsStr = points.trim(); if (pointsStr === '') { setTotalPoints(prev => ({ ...prev, [playerId]: '' })); return; } const pointsValue = parseInt(pointsStr, 10); const maxPoints = settings.races * 15; if (!isNaN(pointsValue) && pointsValue >= 0 && pointsValue <= maxPoints) { setTotalPoints(prev => ({ ...prev, [playerId]: pointsValue })); } else if (!isNaN(pointsValue) && pointsValue > maxPoints) { alert(`Maximale Punktzahl bei ${settings.races} Rennen ist ${maxPoints}.`); setTotalPoints(prev => ({ ...prev, [playerId]: '' })); } else { alert("Punkte müssen eine positive Zahl sein."); setTotalPoints(prev => ({ ...prev, [playerId]: '' })); } }; const handleSettingsChange = (e) => { const { name, value } = e.target; setSettings(prev => ({ ...prev, [name]: (name === 'races' || name === 'cc') ? parseInt(value, 10) : value })); }; const handleSubmit = (e) => { e.preventDefault(); if (selectedPlayerIds.length < 2) { alert("Bitte mindestens 2 Spieler auswählen."); return; } const numPlayers = selectedPlayerIds.length; const validPoints = selectedPlayerIds.reduce((acc, id) => { const points = totalPoints[id]; if (points !== '' && points !== null && points !== undefined && !isNaN(parseInt(points, 10)) && parseInt(points, 10) >= 0) { acc[id] = parseInt(points, 10); } return acc; }, {}); if (Object.keys(validPoints).length !== selectedPlayerIds.length) { alert(`Bitte für alle ${selectedPlayerIds.length} ausgewählten Spieler die Gesamtpunktzahl eintragen.`); return; } onGameRecorded(selectedPlayerIds, validPoints, settings); setTotalPoints({}); }; const isSubmitDisabled = selectedPlayerIds.length < 2 || selectedPlayerIds.some(id => totalPoints[id] === undefined || totalPoints[id] === ''); return createElement('form', { onSubmit: handleSubmit, className: "mb-6 p-4 border border-gray-300 rounded-lg shadow bg-white" }, createElement('h2', { className: "text-xl font-semibold mb-3 text-gray-700" }, "Neues Spiel eintragen"), createElement('div', { className: "mb-4" }, createElement('label', { className: "block text-sm font-medium text-gray-600 mb-1" }, "Spieler auswählen (2-4):"), createElement('div', { className: "flex flex-wrap gap-2 mb-2 min-h-[38px] items-center" }, selectedPlayersDetails.map(player => createElement('div', { key: player.id, className: "flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium" }, player.name, createElement('button', { type: "button", onClick: () => handlePlayerRemove(player.id), className: "ml-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-200 p-0.5", "aria-label": `Spieler ${player.name} entfernen` }, createElement(X, { size: 14, strokeWidth: 3 }) ) ) ) ), selectedPlayerIds.length < 4 && availablePlayers.length > 0 && createElement('select', { onChange: (e) => handlePlayerSelect(e.target.value), value: "", className: "p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-auto", disabled: selectedPlayerIds.length >= 4, "aria-label": "Weiteren Spieler zum Spiel hinzufügen" }, createElement('option', { value: "", disabled: true }, "-- Spieler hinzufügen --"), availablePlayers.map(player => createElement('option', { key: player.id, value: player.id }, `${player.name} (${player.elo})`) ) ), selectedPlayerIds.length >= 4 && createElement('p', { className: "text-sm text-gray-500 mt-1" }, "Maximale Spieleranzahl (4) erreicht."), availablePlayers.length === 0 && selectedPlayerIds.length < 4 && players.length > 0 && createElement('p', { className: "text-sm text-gray-500 mt-1" }, "Keine weiteren Spieler verfügbar."), players.length === 0 && createElement('p', { className: "text-sm text-gray-500 mt-1" }, "Bitte zuerst Spieler hinzufügen.") ), selectedPlayerIds.length >= 2 && createElement('div', { className: "mb-4" }, createElement('label', { className: "block text-sm font-medium text-gray-600 mb-2" }, `Gesamtpunkte eingeben (max. ${settings.races * 15} bei ${settings.races} Rennen):`), createElement('div', { className: "grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3" }, selectedPlayersDetails.map((player) => createElement('div', { key: player.id, className: "flex items-center gap-2" }, createElement('label', { htmlFor: `points-${player.id}`, className: "font-medium w-2/5 truncate", title: player.name }, `${player.name}:`), createElement('input', { id: `points-${player.id}`, type: "number", min: "0", max: settings.races * 15, step: "1", value: totalPoints[player.id] ?? '', onChange: (e) => handlePointsChange(player.id, e.target.value), placeholder: `Punkte`, className: "w-3/5 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none", required: true }) ) ) ) ), createElement('div', { className: "mb-4" }, createElement('button', { type: "button", onClick: () => setShowAdvanced(!showAdvanced), className: "text-sm text-blue-600 hover:text-blue-800 flex items-center", "aria-expanded": showAdvanced }, createElement(Settings, { size: 16, className: "mr-1" }), ` Erweiterte Einstellungen ${showAdvanced ? 'ausblenden' : 'anzeigen'}` ) ), showAdvanced && createElement('div', { className: "mb-4 p-3 border border-gray-200 rounded-md bg-gray-50 grid grid-cols-1 sm:grid-cols-3 gap-4" }, createElement('div', null, createElement('label', { htmlFor: "races", className: "block text-sm font-medium text-gray-600 mb-1" }, "Rennen:"), createElement('select', { id: "races", name: "races", value: settings.races, onChange: handleSettingsChange, className: "w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" }, [4, 6, 8, 10, 12].map(r => createElement('option', { key: r, value: r }, r)) ) ), createElement('div', null, createElement('label', { htmlFor: "cc", className: "block text-sm font-medium text-gray-600 mb-1" }, "CC-Klasse:"), createElement('select', { id: "cc", name: "cc", value: settings.cc, onChange: handleSettingsChange, className: "w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" }, [50, 100, 150, 200].map(c => createElement('option', { key: c, value: c }, `${c}cc`)) ) ), createElement('div', null, createElement('label', { htmlFor: "cpu", className: "block text-sm font-medium text-gray-600 mb-1" }, "CPU:"), createElement('select', { id: "cpu", name: "cpu", value: settings.cpu, onChange: handleSettingsChange, className: "w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none" }, createElement('option', { value: "keine" }, "Keine"), createElement('option', { value: "leicht" }, "Leicht"), createElement('option', { value: "mittel" }, "Mittel"), createElement('option', { value: "schwer" }, "Schwer") ) ) ), createElement('button', { type: "submit", disabled: isSubmitDisabled, className: "w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out" }, "Spiel speichern & Elo berechnen") );
-            };
-            const ImportExportModal = ({ isOpen, onClose, players, onRequestImportConfirm }) => { /* ... unverändert ... */
-                 const [importData, setImportData] = useState(''); const exportData = useMemo(() => { const dataToExport = players.map(({ id, name, elo }) => ({ id, name, elo })); return JSON.stringify(dataToExport, null, 2); }, [players]); const handleImportClick = () => { console.log("[Modal] handleImportClick aufgerufen."); if (importData.trim() === '') { alert("Importfeld ist leer."); return; } console.log("[Modal] Rufe onRequestImportConfirm Prop auf."); onRequestImportConfirm(importData); }; if (!isOpen) return null; return createElement('div', { className: "fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 transition-opacity duration-300 ease-in-out", onClick: onClose, role: "dialog", "aria-modal": "true", "aria-labelledby": "import-export-title" }, createElement('div', { className: "bg-white rounded-lg shadow-xl p-5 sm:p-6 w-full max-w-lg relative max-h-[90vh] overflow-y-auto flex flex-col", onClick: (e) => e.stopPropagation() }, createElement('button', { onClick: onClose, className: "absolute top-2 right-2 text-gray-500 hover:text-gray-800 p-1 rounded-full hover:bg-gray-200 transition-colors", "aria-label": "Schließen" }, createElement(X, { size: 24 })), createElement('h2', { id: "import-export-title", className: "text-xl font-semibold mb-4 text-gray-800" }, "Daten Importieren / Exportieren"), createElement('div', { className: "mb-5" }, createElement('h3', { className: "text-lg font-medium mb-2 text-gray-600" }, "Exportieren"), createElement('p', { className: "text-sm text-gray-500 mb-2" }, "Kopiere den folgenden Text, um deine aktuellen Spielerdaten zu sichern:"), createElement('textarea', { readOnly: true, value: exportData, className: "w-full h-36 p-2 border border-gray-300 rounded-md bg-gray-50 font-mono text-xs resize-none", onClick: (e) => e.target.select(), "aria-label": "Exportierte Spielerdaten (JSON)" }) ), createElement('div', null, createElement('h3', { className: "text-lg font-medium mb-2 text-gray-600" }, "Importieren"), createElement('p', { className: "text-sm text-gray-500 mb-2" }, "Füge hier deine Spielerdaten im JSON-Format ein. ", createElement('strong', { className: "text-red-600" }, "Achtung:"), " Dies überschreibt alle aktuellen Daten."), createElement('textarea', { value: importData, onChange: (e) => setImportData(e.target.value), placeholder: '[{"id": "...", "name": "Spieler1", "elo": 1000}, ...]', className: "w-full h-36 p-2 border border-gray-300 rounded-md font-mono text-xs mb-3 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none", "aria-label": "Spielerdaten zum Importieren (JSON)" }), createElement('button', { onClick: handleImportClick, className: "w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out" }, "Daten Importieren & Überschreiben") ) ) );
-            };
-
-            // --- App Komponente (verwaltet State und Dialoge) ---
-            const App = () => { /* ... unverändert ... */
-                const [players, setPlayers] = useState([]); const [isModalOpen, setIsModalOpen] = useState(false); const [lastPlayerIds, setLastPlayerIds] = useState([]); const [confirmState, setConfirmState] = useState({ isOpen: false, title: '', message: '', onConfirm: () => {} });
-                useEffect(() => { console.log("Versuche Daten aus localStorage zu laden..."); try { const storedPlayers = localStorage.getItem(LOCAL_STORAGE_KEY); if (storedPlayers) { const parsedPlayers = JSON.parse(storedPlayers); if (Array.isArray(parsedPlayers)) { setPlayers(parsedPlayers); console.log("Spielerdaten erfolgreich aus localStorage geladen."); } else { console.warn("Ungültige Daten im localStorage gefunden."); } } else { console.log("Keine Spielerdaten im localStorage gefunden."); } } catch (error) { console.error("Fehler beim Laden/Parsen aus localStorage:", error); } }, []);
-                useEffect(() => { if (players.length > 0 || localStorage.getItem(LOCAL_STORAGE_KEY) !== null) { console.log("Speichere Spielerdaten in localStorage..."); try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(players)); console.log("Spielerdaten erfolgreich gespeichert."); } catch (error) { console.error("Fehler beim Speichern in localStorage:", error); alert("Fehler beim Speichern der Daten. Möglicherweise ist der Speicherplatz voll."); } } }, [players]);
-                useEffect(() => { const isAnyModalOpen = isModalOpen || confirmState.isOpen; if (isAnyModalOpen) { document.body.style.overflow = 'hidden'; } else { document.body.style.overflow = 'auto'; } return () => { document.body.style.overflow = 'auto'; }; }, [isModalOpen, confirmState.isOpen]);
-                const handleAddPlayer = useCallback((name, elo = DEFAULT_ELO) => { const trimmedName = name.trim(); if (!trimmedName) return; const initialElo = parseInt(elo, 10); const validElo = !isNaN(initialElo) ? initialElo : DEFAULT_ELO; const newPlayer = { id: crypto.randomUUID(), name: trimmedName, elo: validElo }; setPlayers(prevPlayers => [...prevPlayers, newPlayer].sort((a, b) => b.elo - a.elo)); console.log("Spieler hinzugefügt:", newPlayer); }, []);
-                const requestDeleteConfirmation = useCallback((player) => { console.log("[App] requestDeleteConfirmation für:", player.name); setConfirmState({ isOpen: true, title: "Löschen bestätigen", message: `Sicher, dass du ${player.name} (Elo: ${player.elo}) löschen möchtest?`, onConfirm: () => handleDeletePlayer(player.id) }); }, []);
-                const handleDeletePlayer = useCallback((playerId) => { console.log("[App] handleDeletePlayer (nach Bestätigung) aufgerufen für ID:", playerId); setPlayers(prevPlayers => { const newPlayers = prevPlayers.filter(p => p.id !== playerId); console.log("[App] Neuer Player-State nach Filter:", newPlayers); return newPlayers; }); console.log("[App] setPlayers für Delete aufgerufen."); }, []);
-                const handleRecordGame = useCallback((playerIds, totalPoints, settings) => { console.log("Recording game:", playerIds, totalPoints, settings); const playersInGame = players.filter(p => playerIds.includes(p.id)); if (playersInGame.length < 2) return; const eloChanges = calculateEloChanges(playersInGame, totalPoints, settings); console.log("Elo Changes:", eloChanges); setPlayers(prevPlayers => prevPlayers.map(p => { if (eloChanges[p.id] !== undefined) { const newElo = p.elo + eloChanges[p.id]; return { ...p, elo: Math.max(100, newElo) }; } return p; }).sort((a, b) => b.elo - a.elo) ); setLastPlayerIds(playerIds); }, [players]);
-                const requestImportConfirmation = useCallback((jsonData) => { console.log("[App] requestImportConfirmation aufgerufen."); const confirmAction = () => executeImportLogic(jsonData); setConfirmState({ isOpen: true, title: "Import bestätigen", message: "Achtung: Das Importieren überschreibt alle aktuellen Spielerdaten und Ranglisten. Fortfahren?", onConfirm: confirmAction }); }, []);
-                const executeImportLogic = useCallback((jsonData) => { console.log("[App] executeImportLogic aufgerufen."); if (!jsonData) { console.error("Keine Importdaten zum Verarbeiten vorhanden (Argument war leer)."); alert("Import fehlgeschlagen: Keine Daten empfangen."); return false; } try { const importedData = JSON.parse(jsonData); console.log("[App] Import - Geparsed:", importedData); if (!Array.isArray(importedData)) throw new Error("Importdaten müssen ein Array sein."); const validPlayers = importedData.map((item, index) => { if (typeof item !== 'object' || item === null) return null; const name = String(item.name || '').trim(); const elo = parseInt(item.elo, 10); if (!name || isNaN(elo)) { console.warn(`Ungültiger Eintrag bei Index ${index} übersprungen.`); return null; } return { id: typeof item.id === 'string' && item.id.trim() ? item.id.trim() : crypto.randomUUID(), name: name, elo: elo }; }).filter(p => p !== null); console.log("[App] Import - Validiert:", validPlayers); if (validPlayers.length === 0 && importedData.length > 0) { throw new Error("Keine gültigen Spielerdaten im Import gefunden."); } setPlayers(validPlayers.sort((a, b) => b.elo - a.elo)); setLastPlayerIds([]); console.log("[App] Import erfolgreich, State gesetzt."); alert(`Import erfolgreich: ${validPlayers.length} Spieler geladen.`); return true; } catch (error) { console.error("Import fehlgeschlagen:", error); alert(`Import fehlgeschlagen: ${error.message}`); return false; } }, []);
-                const closeConfirmDialog = () => { setConfirmState({ isOpen: false, title: '', message: '', onConfirm: () => {} }); };
-
-                // --- Rendern der App-Struktur ---
-                console.log("[App] Rendere App mit players:", players);
-                return createElement( Fragment, null, createElement( 'div', { className: "min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 p-4 sm:p-8 font-sans" }, createElement( 'div', { className: "max-w-4xl mx-auto bg-white/90 backdrop-blur-sm p-4 sm:p-6 rounded-xl shadow-lg border border-gray-200" }, createElement( 'header', { className: "mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-gray-200 pb-4" }, createElement( 'h1', { className: "text-2xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left" }, createElement('span', { role: "img", "aria-label": "Rennwagen-Emoji", className: "mr-2" }, "🏎️"), " Mario Kart Elo Rechner" ), createElement( 'div', { className: "flex gap-2" }, createElement( 'button', { onClick: () => setIsModalOpen(true), className: "flex items-center px-3 py-2 bg-gray-700 text-white text-sm rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-150 ease-in-out shadow", title: "Daten Importieren/Exportieren" }, createElement(Upload, { size: 16, className: "mr-1 sm:mr-2 shrink-0" }), createElement('span', { className: "hidden sm:inline" }, "Import/Export"), createElement('span', { className: "sm:hidden" }, "I/O") ) ) ), createElement( 'main', { className: "space-y-6" }, createElement(PlayerForm, { onAddPlayer: handleAddPlayer }), createElement(GameForm, { players: players, onGameRecorded: handleRecordGame, lastPlayerIds: lastPlayerIds }), createElement(Leaderboard, { players: players, onRequestDelete: requestDeleteConfirmation }) ), createElement( 'footer', { className: "mt-8 pt-4 border-t border-gray-200 text-center text-xs sm:text-sm text-gray-500" }, "Elo-Berechnung basiert auf Punkten & K=", K_BASE, " (Basis).", createElement('br', { className: "hidden sm:block" }), " Daten werden lokal im Browser gespeichert." ) ) ), createElement(ImportExportModal, { isOpen: isModalOpen, onClose: () => setIsModalOpen(false), players: players, onRequestImportConfirm: requestImportConfirmation }), createElement(ConfirmDialog, { isOpen: confirmState.isOpen, onClose: closeConfirmDialog, onConfirm: confirmState.onConfirm, title: confirmState.title }, confirmState.message) );
-            };
-            // --- Rendere die App Komponente ---
-            if (!rootDiv) throw new Error("Root element #root not found.");
-            rootDiv.innerHTML = ''; // Clear status
-            const root = ReactDOM.createRoot(rootDiv);
-            root.render(createElement(App)); // Rendere die Haupt-App
-            console.log("App Render initiiert.");
-
-            // --- Service Worker Registrierung ---
-            if ('serviceWorker' in navigator) {
-              console.log("Versuche Service Worker zu registrieren...");
-              navigator.serviceWorker.register('service-worker.js', { scope: './' }) // Expliziter Scope
-                .then(registration => {
-                  console.log('Service Worker erfolgreich registriert mit Scope:', registration.scope);
-                })
-                .catch(error => {
-                  console.error('Service Worker Registrierung fehlgeschlagen:', error);
-                });
-            } else {
-                 console.warn("Service Worker wird von diesem Browser nicht unterstützt.");
-            }
-
-        } catch (error) {
-            // Fange alle Fehler ab
-            showStatus(`Fehler bei der Initialisierung der App: ${error.message}`, true);
-        }
-      });
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js', {scope: './'})
+          .then(reg => console.log('Service Worker registriert:', reg.scope))
+          .catch(err => console.error('SW‑Registrierung fehlgeschlagen:', err));
+      }
     </script>
-
 </body>
 </html>
