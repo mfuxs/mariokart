@@ -926,10 +926,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const MatchHistory = ({ games }) => {
       return createElement(
         "div",
-        {
-          className:
-            "p-4 border border-gray-300 rounded-lg shadow bg-white overflow-x-auto",
-        },
+        { className: "p-4 border border-gray-300 rounded-lg shadow bg-white overflow-x-auto" },
         createElement(
           "h2",
           { className: "text-xl font-semibold mb-3 text-gray-700" },
@@ -950,26 +947,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 createElement(
                   "tr",
                   null,
-                  createElement(
-                    "th",
-                    { className: "px-4 py-2 text-left" },
-                    "Datum",
-                  ),
-                  createElement(
-                    "th",
-                    { className: "px-4 py-2 text-left" },
-                    "Teilnehmer",
-                  ),
-                  createElement(
-                    "th",
-                    { className: "px-4 py-2 text-left" },
-                    "Punkte",
-                  ),
-                  createElement(
-                    "th",
-                    { className: "px-4 py-2 text-left" },
-                    "Elo Δ",
-                  ),
+                  createElement("th", { className: "px-4 py-2 text-left" }, "Datum"),
+                  createElement("th", { className: "px-4 py-2 text-left" }, "Teilnehmer"),
+                  createElement("th", { className: "px-4 py-2 text-left" }, "Punkte"),
+                  createElement("th", { className: "px-4 py-2 text-left" }, "Elo Δ"),
                 ),
               ),
               createElement(
@@ -978,10 +959,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 games.map((g, idx) =>
                   createElement(
                     "tr",
-                    {
-                      key: idx,
-                      className: idx % 2 ? "bg-gray-50" : "bg-white",
-                    },
+                    { key: idx, className: idx % 2 ? "bg-gray-50" : "bg-white" },
                     createElement(
                       "td",
                       { className: "px-4 py-2 whitespace-nowrap" },
@@ -1030,10 +1008,9 @@ document.addEventListener("DOMContentLoaded", () => {
           .filter((p) => selectedIds.includes(p.id))
           .map((p) => {
             const data = [];
-            let startElo =
-              p.history && p.history.length
-                ? p.history[0].eloAfter - p.history[0].eloChange
-                : p.elo;
+            let startElo = p.history && p.history.length
+              ? p.history[0].eloAfter - p.history[0].eloChange
+              : p.elo;
             data.push({ x: new Date(0), y: startElo });
             (p.history || []).forEach((h) => {
               data.push({ x: new Date(h.date), y: h.eloAfter });
@@ -1144,10 +1121,7 @@ document.addEventListener("DOMContentLoaded", () => {
           localStorage.getItem(LOCAL_STORAGE_KEY_GAMES) !== null
         ) {
           try {
-            localStorage.setItem(
-              LOCAL_STORAGE_KEY_GAMES,
-              JSON.stringify(games),
-            );
+            localStorage.setItem(LOCAL_STORAGE_KEY_GAMES, JSON.stringify(games));
           } catch (error) {
             console.error("Fehler beim Speichern der Spiele:", error);
           }
@@ -1238,9 +1212,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     eloChange: eloChanges[p.id],
                     eloAfter: newElo,
                   };
-                  const history = Array.isArray(p.history)
-                    ? [...p.history, historyEntry]
-                    : [historyEntry];
+                  const history = Array.isArray(p.history) ? [...p.history, historyEntry] : [historyEntry];
                   return { ...p, elo: newElo, history };
                 }
                 return p;

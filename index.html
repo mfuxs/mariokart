@@ -1,79 +1,163 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
-<head>
+  <head>
     <!-- Basis‑Pfad für alle relativen URLs auf GitHub Pages  --------------- -->
-    <base href="/mariokart/">
+    <base href="/mariokart/" />
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Mario Kart Elo Rechner</title>
-    <meta name="description" content="Ein einfacher Elo‑Rechner für Mario Kart.">
+    <meta
+      name="description"
+      content="Ein einfacher Elo‑Rechner für Mario Kart."
+    />
 
     <!-- PWA Manifest & Theme ----------------------------------------------- -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0ea5e9">
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0ea5e9" />
 
     <!-- Apple PWA‑Meta‑Tags -------------------------------------------------- -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="MK Elo Rechner">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="MK Elo Rechner" />
 
     <!-- Apple‑Touch‑Icons (wird fürs Homescreen‑Icon verwendet) ------------- -->
-    <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167x167.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180x180.png">
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="icons/icon-120x120.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="icons/icon-152x152.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="167x167"
+      href="icons/icon-167x167.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="icons/icon-180x180.png"
+    />
 
     <!-- Favicon für klassische Browser -------------------------------------- -->
-    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" href="icons/icon-192x192.png" />
 
     <!-- Fonts & Tailwind ----------------------------------------------------- -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Custom Styles -------------------------------------------------------- -->
     <style>
-        body{font-family:'Inter',sans-serif}
-        svg{display:inline-block;vertical-align:middle}
-        button:disabled{opacity:.6;cursor:not-allowed}
-        textarea.resize-none{resize:none}
-        /* Scrollbar */
-        ::-webkit-scrollbar{width:8px;height:8px}
-        ::-webkit-scrollbar-track{background:#f1f1f1;border-radius:10px}
-        ::-webkit-scrollbar-thumb{background:#a8a8a8;border-radius:10px;border:2px solid #f1f1f1}
-        ::-webkit-scrollbar-thumb:hover{background:#7a7a7a}
-        /* Focus */
-        *:focus-visible{outline:2px solid rgb(59 130 246 / .5);outline-offset:2px;border-radius:2px}
-        /* Confirm‑Dialog */
-        .confirm-dialog-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:50;opacity:0;transition:opacity .15s}
-        .confirm-dialog-backdrop.open{opacity:1}
-        .confirm-dialog-content{background:#fff;padding:1.5rem;border-radius:.5rem;box-shadow:0 4px 6px -1px rgb(0 0 0 / .1),0 2px 4px -2px rgb(0 0 0 / .1);max-width:90%;width:400px;transform:scale(.95);transition:transform .15s}
-        .confirm-dialog-backdrop.open .confirm-dialog-content{transform:scale(1)}
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      svg {
+        display: inline-block;
+        vertical-align: middle;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      textarea.resize-none {
+        resize: none;
+      }
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #a8a8a8;
+        border-radius: 10px;
+        border: 2px solid #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #7a7a7a;
+      }
+      /* Focus */
+      *:focus-visible {
+        outline: 2px solid rgb(59 130 246 / 0.5);
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+      /* Confirm‑Dialog */
+      .confirm-dialog-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .confirm-dialog-backdrop.open {
+        opacity: 1;
+      }
+      .confirm-dialog-content {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow:
+          0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        max-width: 90%;
+        width: 400px;
+        transform: scale(0.95);
+        transition: transform 0.15s;
+      }
+      .confirm-dialog-backdrop.open .confirm-dialog-content {
+        transform: scale(1);
+      }
     </style>
-</head>
+  </head>
 
-<body class="bg-gray-100">
+  <body class="bg-gray-100">
     <div id="root">
-        <p class="p-5 font-sans">Lade App…</p>
+      <p class="p-5 font-sans">Lade App…</p>
     </div>
 
     <!-- React & React‑DOM  --------------------------------------------------- -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+      crossorigin
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Deine gesamte JS‑App (unverändert) ---------------------------------- -->
-    <script src="app.js"></script><!--  ⇐  verschiebe den langen Inline‑Code in eine eigene Datei; GitHub Pages cached das besser -->
+    <script src="app.js"></script>
+    <!--  ⇐  verschiebe den langen Inline‑Code in eine eigene Datei; GitHub Pages cached das besser -->
 
     <!-- Service Worker Registrierung ---------------------------------------- -->
     <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js', {scope: './'})
-          .then(reg => console.log('Service Worker registriert:', reg.scope))
-          .catch(err => console.error('SW‑Registrierung fehlgeschlagen:', err));
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("service-worker.js", { scope: "./" })
+          .then((reg) => console.log("Service Worker registriert:", reg.scope))
+          .catch((err) =>
+            console.error("SW‑Registrierung fehlgeschlagen:", err),
+          );
       }
     </script>
-</body>
+  </body>
 </html>
