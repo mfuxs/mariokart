@@ -79,8 +79,8 @@ self.addEventListener('fetch', event => {
             return networkResponse;
         }).catch(error => {
             console.error(`[SW ${CACHE_NAME}] Netzwerk-Fetch fehlgeschlagen für ${event.request.url}:`, error);
-            // Hier könnte man eine Offline-Fallback-Seite anzeigen
-            // throw error; // Fehler weitergeben, damit Browser Standardfehler zeigt
+            // Fehler weitergeben, damit Browser Standardfehler zeigt
+            throw error;
         });
       })
   );
